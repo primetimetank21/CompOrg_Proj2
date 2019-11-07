@@ -14,9 +14,13 @@
 
 .text
 main:
-	li $v0, 4
-	la $a0, invalid
-	syscall
+
+	badChar:
+		li $v0, 4	#print_string command
+		la $a0, invalid	#load "Invalid input" into $a0
+		syscall		#execute print_string
+		j exit		#jumps to exit
+
 
 	exit:			#finishes the programs
 		li $v0, 10	#exit_program command
