@@ -15,6 +15,17 @@
 .text
 main:
 
+	getInput:		#gets all of the input from a user until they hit '\n'
+		la $s0, array	#load address of array into $s0
+		loop:	
+			jal getChar
+	
+		getChar:		#gets a single character input from user
+			li $v0, 8	#read_string command
+			la $a0, char	#load address of char for read
+			li $a1, 2	#length of string is 1byte char and 1byte for null
+			syscall
+	
 	badChar:
 		li $v0, 4	#print_string command
 		la $a0, invalid	#load "Invalid input" into $a0
