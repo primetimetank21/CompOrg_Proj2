@@ -11,3 +11,13 @@
 	char: 		.space 2		#1 byte for char, 1 byte for NULL
 	newline:	.asciiz "\n"		#newline character
 	invalid:	.asciiz "Invalid input"	#displays to user if input is invalid
+
+.text
+main:
+	li $v0, 4
+	la $a0, invalid
+	syscall
+
+	exit:			#finishes the programs
+		li $v0, 10	#exit_program command
+		syscall		#terminates program
