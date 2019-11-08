@@ -38,24 +38,46 @@ main:
 			la $a0, char			#load address of char for read
 			li $a1, 2			#length of string is 1byte char and 1byte for null
 			syscall				#execute read_string
-			addi $s3, $s3, 1		#adds 1 to $s3
+			addi $s3, $s3, 1		#$s3 += 1
 
 			jr $ra				#return to loop
 	
 	checkSpace:					#checks for white space characters that appear before a non-white space character
+		lb $t2, space				#load ' ' into $t2
+		lb $t3, tab				#load '\t' into $t3
+		lb $t4, newline				#load '\n' into $t4
 		la $s0, array				#load address of array into $s0
-		addi $s0, $s0, -4
+		addi $s0, $s0, -4			#move 4 bytes before array
 		loop2:					#loops through array checking each character
 			addi $s0, $s0, 4		#increment address
+			addi $s3, $s3, 1		#adds 1 to $s3
 			lb $t1, 0($s0)			#loads current char in array into $t1
-			lb $t2, space			#load ' ' into $t2
-			lb $t3, tab			#load '\t' into $t3
-			lb $t4, newline			#load '\n' into $t4
-			beq $t1, $t2, loop2		#char is ' ' ? jump to checkChar
-			beq $t1, $t3, loop2		#char is '\t' ? jump to checkChar
-			beq $t1, $t4, exit		#char is '\n' ? jump to checkChar
+			beq $t1, $t2, loop2		#char is ' ' ? jump to loop2
+			beq $t1, $t3, loop2		#char is '\t' ? jump to loop2
+			beq $t1, $t4, exit		#char is '\n' ? jump to exit
 
-			j checkChar			#jump to checkChar
+			move $s1, $t1			#loads address of current char into $s1 -- VERY IMPORTANT
+			move $s3, $zero			#resets counter to keep track of how many chars
+			addi $s3, $s3, 1		#starts counter at 1
+			j checkLength			#jump to checkLength
+
+	
+	addChar:					#adds characters to a running sum
+		convert:				#converts ascii values && checks for validity
+		
+			jr $ra				#returns to checkChar in order to increment array element
+
+		
+	checkLength:
+		move $s2, $t1				#eventually stores the "last" char in the array
+		beq $t1, $t4, checkChar			#char is '\n' ? jump to checkChar
+		beq $t1, $t2, badChar			#char is ' ' ? jump to badChar
+		beq $t1, $t3, badChar			#char is '\t' ? jump to badChar
+		beq $s3, 5, badChar			#$s3 == 5 ? jump to badChar
+		addi $s3, $s3, 1			#$s3 += 1
+		addi $s0, $s0, 4			#increment address
+		lb $t1, 0($s0)				#loads current char in array into $t1
+		j checkLength				#jump back to start of checkLength
 	
 	checkChar:					#checks for characters that are within Base-N's range
 		lb $t2, space				#load ' ' into $t2
@@ -64,9 +86,9 @@ main:
 		beq $t1, $t2, badChar			#char is ' ' ? jump to badChar
 		beq $t1, $t3, badChar			#char is '\t' ? jump to badChar
 		beq $t1, $t4, exit			#char is '\n' ? jump to exit
-######
-###### do something here to start adding/checking ascii values
-######
+
+		jal convert
+
 		addi $s0, $s0, 4			#increment address
 		lb $t1, 0($s0)				#loads current char in array into $t1
 
@@ -80,6 +102,6 @@ main:
 		j exit					#jumps to exit
 
 
-	exit:						#finishes the programs
+	exit:						#finishes the program
 		li $v0, 10				#exit_program command
 		syscall					#terminates program
