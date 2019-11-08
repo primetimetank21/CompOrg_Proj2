@@ -25,8 +25,8 @@ main:
 			lb $t0, char			#load a single byte into $t0, remove null
 			sb $t0, 0($s0)			#store the char array
 			lb $t1, newline			#load '\n' into $t1
-			beq $t0, $t1, checkSpace	#end of string ? jump to exit
-			beq $s3, 1000, checkSpace	#1000 chars ? jump to exit
+			beq $t0, $t1, checkSpace	#end of string ? jump to checkSpace
+			beq $s3, 1000, checkSpace	#1000 chars ? jump to checkSpace
 			addi $s0, $s0, 4		#$s0 += 4
 
 			j loop				#jumps back to start of loop
@@ -44,17 +44,18 @@ main:
 	
 	checkSpace:					#checks for white space characters that appear before a non-white space character
 		la $s0, array				#load address of array into $s0
+		addi $s0, $s0, -4
 		loop2:					#loops through array checking each character
+			addi $s0, $s0, 4		#increment address
 			lb $t1, 0($s0)			#loads current char in array into $t1
 			lb $t2, space			#load ' ' into $t2
 			lb $t3, tab			#load '\t' into $t3
-			#lb $t4, newline			#load '\n' into $t4
-			bne $t1, $t2, checkChar		#char is ' ' ? jump to checkChar
-			bne $t1, $t3, checkChar		#char is '\t' ? jump to checkChar
-			#bne $t1, $t4, exit		#char is '\n' ? jump to exit
+			lb $t4, newline			#load '\n' into $t4
+			beq $t1, $t2, loop2		#char is ' ' ? jump to checkChar
+			beq $t1, $t3, loop2		#char is '\t' ? jump to checkChar
+			beq $t1, $t4, exit		#char is '\n' ? jump to checkChar
 
-			addi $s0, $s0, 4		#increment address
-			j loop2				#jump back to start of loop2
+			j checkChar			#jump to checkChar
 	
 	checkChar:					#checks for characters that are within Base-N's range
 		lb $t2, space				#load ' ' into $t2
@@ -63,6 +64,13 @@ main:
 		beq $t1, $t2, badChar			#char is ' ' ? jump to badChar
 		beq $t1, $t3, badChar			#char is '\t' ? jump to badChar
 		beq $t1, $t4, exit			#char is '\n' ? jump to exit
+######
+###### do something here to start adding/checking ascii values
+######
+		addi $s0, $s0, 4			#increment address
+		lb $t1, 0($s0)				#loads current char in array into $t1
+
+		j checkChar				#jump back to start of checkChar
 
 
 	badChar:
