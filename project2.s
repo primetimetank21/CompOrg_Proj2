@@ -45,11 +45,16 @@ main:
 	checkSpace:					#checks for white space characters that appear before a non-white space character
 		la $s0, array				#load address of array into $s0
 		loop2:					#loops through array checking each character
-			lb $t1, 0($s0)
-			lb $t2, space
-			lb $t3, tab
-			lb $t4, newline
+			lb $t1, 0($s0)			#loads current char in array into $t1
+			lb $t2, space			#load ' ' into $t2
+			lb $t3, tab			#load '\t' into $t3
+			lb $t4, newline			#load '\n' into $t4
+			beq $t1, $t2, badChar		#char is ' ' ? jump to badChar
+			beq $t1, $t3, badChar		#char is '\t' ? jump to badChar
+			beq $t1, $t4, exit		#char is '\n' ? jump to exit
 
+			addi $s0, $s0, 4
+			j loop2
 			
 
 	badChar:
