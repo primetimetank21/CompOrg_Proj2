@@ -43,6 +43,13 @@ main:
 			jr $ra				#return to loop
 	
 	checkSpace:					#checks for white space characters that appear before a non-white space character
+		la $s0, array				#load address of array into $s0
+		loop2:					#loops through array checking each character
+			lb $t1, 0($s0)
+			lb $t2, space
+			lb $t3, tab
+			lb $t4, newline
+
 			
 
 	badChar:
