@@ -48,14 +48,22 @@ main:
 			lb $t1, 0($s0)			#loads current char in array into $t1
 			lb $t2, space			#load ' ' into $t2
 			lb $t3, tab			#load '\t' into $t3
-			lb $t4, newline			#load '\n' into $t4
-			beq $t1, $t2, badChar		#char is ' ' ? jump to badChar
-			beq $t1, $t3, badChar		#char is '\t' ? jump to badChar
-			beq $t1, $t4, exit		#char is '\n' ? jump to exit
+			#lb $t4, newline			#load '\n' into $t4
+			bne $t1, $t2, checkChar		#char is ' ' ? jump to checkChar
+			bne $t1, $t3, checkChar		#char is '\t' ? jump to checkChar
+			#bne $t1, $t4, exit		#char is '\n' ? jump to exit
 
-			addi $s0, $s0, 4
-			j loop2
-			
+			addi $s0, $s0, 4		#increment address
+			j loop2				#jump back to start of loop2
+	
+	checkChar:					#checks for characters that are within Base-N's range
+		lb $t2, space				#load ' ' into $t2
+		lb $t3, tab				#load '\t' into $t3
+		lb $t4, newline				#load '\n' into $t4
+		beq $t1, $t2, badChar			#char is ' ' ? jump to badChar
+		beq $t1, $t3, badChar			#char is '\t' ? jump to badChar
+		beq $t1, $t4, exit			#char is '\n' ? jump to exit
+
 
 	badChar:
 		li $v0, 4				#print_string command
