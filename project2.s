@@ -101,11 +101,16 @@ main:
 	check_upper:
 		blt $s4, 65, badChar		#if array[i] < 65, jump to badChar 
 		bgt $s4, 85, check_lower	#if array[i] > 85, jump to check_lower
-		addi $s4, $s4, -64		#else, $s4 = array[i] - 64
-		addi $s4, $s4, 9		#$s4 = $s4 + 9
+		addi $s4, $s4, -64		#else, ($s4) = ($s4) - 64
+		addi $s4, $s4, 9		#($s4) = ($s4) + 9
 		j _return	  		#jumps to _return
 
 	check_lower:
+		blt $s4, 97,  badChar		#if ($s4)] < 97, jump to badChar 
+		bgt $s4, 117, badChar		#if ($s4) > 117, jump to badChar 
+		addi $s4, $s4, -96		#else, ($s4) = ($s4) - 96
+		addi $s4, $s4, 9		#($s4) = ($s4) + 9
+		j _return	  		#jumps to _return		
 
 	checkLength:
 		beq $t1, $t4, checkChar			#char is '\n' ? jump to preCheckChar
