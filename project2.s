@@ -7,6 +7,7 @@
 
 .data
 	array:			.space 4000			#1000 element array (1 NULL space)
+	baseN:			.word 31			#base-N number
 	char: 			.space 2			#1 byte for char, 1 byte for NULL
 	invalid:		.asciiz "Invalid input"		#displays to user if input is invalid
 	newline:		.asciiz "\n"			#newline character
@@ -19,6 +20,7 @@ main:
 	getInput:					#gets all of the input from a user until they hit '\n'
 		la $s0, array				#load address of array into $s0
 		move $s3, $zero				#counter to keep track of how many chars
+		move $s7, $zero				#stores sum
 		loop:	
 			jal getChar			#jump to getChar
 			lb $t0, char			#load a single byte into $t0, remove null
@@ -62,9 +64,16 @@ main:
 	
 	addChar:					#adds characters to a running sum
 		convert:				#converts ascii values && checks for validity
-		
+			blt $s4, 48, _zero		#if ($s4) < 48, jump to _zero
+			bgt $s4, 57, check_upper	#if ($s4) > 57, jump to check_upper
+			addi $s4, $s4, -48		#else, ($s4) = ($s4) - 48
+			add $s7, $s7, $s4		#adds $t3 to total sum
 			jr $ra				#returns to checkChar in order to increment array element
-	
+
+	_zero:
+	check_upper:
+	check_lower:
+
 	checkLength:
 		beq $t1, $t4, checkChar			#char is '\n' ? jump to preCheckChar
 		beq $t1, $t2, badChar			#char is ' ' ? jump to badChar
