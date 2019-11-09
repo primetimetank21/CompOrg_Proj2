@@ -63,24 +63,38 @@ main:
 			j checkLength			#jump to checkLength
 
 	pow0:
+		addi $t3, $zero, 1
+		mult $t1, $t3
+		mflo $t2
+		mult $t2, $s4
+		mflo $s4
+		j _return
+
 	pow1:
+		j _return
+
 	pow2:
+		j _return
+
 	pow3:
+		j _return
 
 	
 	addChar:					#adds characters to a running sum
 		convert:				#converts ascii values && checks for validity
+			lw $t1, baseN
 			blt $s4, 48, badChar		#if ($s4) < 48, jump to badChar
 			bgt $s4, 57, check_upper	#if ($s4) > 57, jump to check_upper
 			addi $s4, $s4, -48		#else, ($s4) = ($s4) - 48
-			beq $s5, 0, pow0
-			beq $s5, 1, pow1
-			beq $s5, 2, pow2
-			beq $s5, 3, pow3
+
 			_return:
-				
+				beq $s5, 0, pow0		#jumps to pow0 if ($s5) == 0
+				beq $s5, 1, pow1		#jumps to pow1 if ($s5) == 0
+				beq $s5, 2, pow2		#jumps to pow2 if ($s5) == 0
+				beq $s5, 3, pow3		#jumps to pow3 if ($s5) == 0
 
 				add $s7, $s7, $s4		#adds $t3 to total sum
+				addi $s5, $s5, 1		
 
 				jr $ra				#returns to checkChar in order to increment array element
 
@@ -89,7 +103,6 @@ main:
 		bgt $s4, 85, check_lower	#if array[i] > 85, jump to check_lower
 		addi $s4, $s4, -64		#else, $s4 = array[i] - 64
 		addi $s4, $s4, 9		#$s4 = $s4 + 9
-		add $s7, $s7, $s4		#adds $s4 to total sum
 		j _return	  		#jumps to _return
 
 	check_lower:
