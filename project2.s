@@ -21,6 +21,7 @@ main:
 		la $s0, array				#load address of array into $s0
 		move $s3, $zero				#counter to keep track of how many chars
 		move $s7, $zero				#stores sum
+		move $s5, $zero				#counter to keep track of which valid element
 		loop:	
 			jal getChar			#jump to getChar
 			lb $t0, char			#load a single byte into $t0, remove null
@@ -61,22 +62,36 @@ main:
 			addi $s3, $s3, 1		#starts counter at 1
 			j checkLength			#jump to checkLength
 
+	pow0:
+	pow1:
+	pow2:
+	pow3:
+
 	
 	addChar:					#adds characters to a running sum
 		convert:				#converts ascii values && checks for validity
 			blt $s4, 48, badChar		#if ($s4) < 48, jump to badChar
 			bgt $s4, 57, check_upper	#if ($s4) > 57, jump to check_upper
 			addi $s4, $s4, -48		#else, ($s4) = ($s4) - 48
-			add $s7, $s7, $s4		#adds $t3 to total sum
-			
+			beq $s5, 0, pow0
+			beq $s5, 1, pow1
+			beq $s5, 2, pow2
+			beq $s5, 3, pow3
 			_return:
+				
+
+				add $s7, $s7, $s4		#adds $t3 to total sum
+
 				jr $ra				#returns to checkChar in order to increment array element
 
 	check_upper:
 		blt $s4, 65, badChar		#if array[i] < 65, jump to badChar 
 		bgt $s4, 85, check_lower	#if array[i] > 85, jump to check_lower
 		addi $s4, $s4, -64		#else, $s4 = array[i] - 64
-		addi $s4, $s4, 9		#$t3 = $t3 + 9
+		addi $s4, $s4, 9		#$s4 = $s4 + 9
+		add $s7, $s7, $s4		#adds $s4 to total sum
+		j _return	  		#jumps to _return
+
 	check_lower:
 
 	checkLength:
