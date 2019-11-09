@@ -6,13 +6,12 @@
 #  M = 21
 
 .data
-	array:		.space 4000			#1000 element array (1 NULL space)
-	array_size:	.word 10			#10 elements in array
-	char: 		.space 2			#1 byte for char, 1 byte for NULL
-	invalid:	.asciiz "Invalid input"		#displays to user if input is invalid
-	newline:	.asciiz "\n"			#newline character
-	space:		.asciiz " "			#space character
-	tab:		.asciiz "\t"			#tab character
+	array:			.space 4000			#1000 element array (1 NULL space)
+	char: 			.space 2			#1 byte for char, 1 byte for NULL
+	invalid:		.asciiz "Invalid input"		#displays to user if input is invalid
+	newline:		.asciiz "\n"			#newline character
+	space:			.asciiz " "			#space character
+	tab:			.asciiz "\t"			#tab character
 
 .text
 main:
@@ -49,14 +48,13 @@ main:
 		la $s0, array				#load address of array into $s0
 		addi $s0, $s0, -4			#move 4 bytes before array
 		loop2:					#loops through array checking each character
+			move $s1, $s0			#stores address of FIRST CHAR to $s1
 			addi $s0, $s0, 4		#increment address
 			addi $s3, $s3, 1		#adds 1 to $s3
 			lb $t1, 0($s0)			#loads current char in array into $t1
 			beq $t1, $t2, loop2		#char is ' ' ? jump to loop2
 			beq $t1, $t3, loop2		#char is '\t' ? jump to loop2
 			beq $t1, $t4, exit		#char is '\n' ? jump to exit
-
-			move $s1, $t1			#loads address of current char into $s1 -- VERY IMPORTANT
 			move $s3, $zero			#resets counter to keep track of how many chars
 			addi $s3, $s3, 1		#starts counter at 1
 			j checkLength			#jump to checkLength
@@ -66,31 +64,29 @@ main:
 		convert:				#converts ascii values && checks for validity
 		
 			jr $ra				#returns to checkChar in order to increment array element
-
-		
+	
 	checkLength:
-		move $s2, $t1				#eventually stores the "last" char in the array
-		beq $t1, $t4, checkChar			#char is '\n' ? jump to checkChar
+		beq $t1, $t4, checkChar			#char is '\n' ? jump to preCheckChar
 		beq $t1, $t2, badChar			#char is ' ' ? jump to badChar
 		beq $t1, $t3, badChar			#char is '\t' ? jump to badChar
 		beq $s3, 5, badChar			#$s3 == 5 ? jump to badChar
 		addi $s3, $s3, 1			#$s3 += 1
+		move $s2, $s0				#stores address of LAST CHAR (that isn't '\n') to $s2
 		addi $s0, $s0, 4			#increment address
+		
 		lb $t1, 0($s0)				#loads current char in array into $t1
 		j checkLength				#jump back to start of checkLength
 	
 	checkChar:					#checks for characters that are within Base-N's range
-		lb $t2, space				#load ' ' into $t2
-		lb $t3, tab				#load '\t' into $t3
-		lb $t4, newline				#load '\n' into $t4
-		beq $t1, $t2, badChar			#char is ' ' ? jump to badChar
-		beq $t1, $t3, badChar			#char is '\t' ? jump to badChar
-		beq $t1, $t4, exit			#char is '\n' ? jump to exit
+		lb $s4, 0($s2)				#loads current char in array into $s4
 
-		jal convert
-
-		addi $s0, $s0, 4			#increment address
-		lb $t1, 0($s0)				#loads current char in array into $t1
+#this is	#li $v0, 11
+#for debug	#move $a0, $s4
+#testing	#syscall
+		
+		jal convert				#jumps to convert && remembers this address
+		addi $s2, $s2, -4			#decrement address
+		beq $s2, $s1, exit			#address is starting address ? jump to exit
 
 		j checkChar				#jump back to start of checkChar
 
