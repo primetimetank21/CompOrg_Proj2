@@ -64,14 +64,19 @@ main:
 	
 	addChar:					#adds characters to a running sum
 		convert:				#converts ascii values && checks for validity
-			blt $s4, 48, _zero		#if ($s4) < 48, jump to _zero
+			blt $s4, 48, badChar		#if ($s4) < 48, jump to badChar
 			bgt $s4, 57, check_upper	#if ($s4) > 57, jump to check_upper
 			addi $s4, $s4, -48		#else, ($s4) = ($s4) - 48
 			add $s7, $s7, $s4		#adds $t3 to total sum
-			jr $ra				#returns to checkChar in order to increment array element
+			
+			_return:
+				jr $ra				#returns to checkChar in order to increment array element
 
-	_zero:
 	check_upper:
+		blt $s4, 65, badChar		#if array[i] < 65, jump to badChar 
+		bgt $s4, 85, check_lower	#if array[i] > 85, jump to check_lower
+		addi $s4, $s4, -64		#else, $s4 = array[i] - 64
+		addi $s4, $s4, 9		#$t3 = $t3 + 9
 	check_lower:
 
 	checkLength:
