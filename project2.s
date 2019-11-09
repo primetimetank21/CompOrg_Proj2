@@ -62,22 +62,29 @@ main:
 			addi $s3, $s3, 1		#starts counter at 1
 			j checkLength			#jump to checkLength
 
-	pow0:
-		addi $t3, $zero, 1
-		mult $t1, $t3
-		mflo $t2
-		mult $t2, $s4
-		mflo $s4
-		j _return
-
 	pow1:
-		j _return
+		mult $t1, $s4				#($LO) = base-N^1 * ($s4)
+		mflo $s4				#($s4) = ($LO)
+		j _return				#jumps to _return
 
 	pow2:
-		j _return
+		mult $t1, $t1				#($LO) = base-N * base-N
+		mflo $t1				#($t1) = ($LO)
+		mult $t1, $s4				#($LO) = base-N^2 * ($s4)
+		mflo $s4				#($s4) = ($LO)
+		j _return				#jumps to _return
 
 	pow3:
-		j _return
+		move $t3, $zero				#temporary counter for pow3_loop
+		pow3_loop:				#gets base-N^3
+			mult $t1, $t1			#($LO) = ($t1) * base-N
+			mflo $t1			#($t1) = ($LO)
+			addi $t3, $t3, 1		#($t3) += 1
+			blt $t3, 2, pow3_loop		#($t3) < 2 ? jump to pow3_loop
+
+		mult $t1, $s4				#($LO) = base-N^3 * ($s4)
+		mflo $s4				#($s4) = ($LO)
+		j _return				#jumps to _return
 
 	
 	addChar:					#adds characters to a running sum
@@ -88,13 +95,12 @@ main:
 			addi $s4, $s4, -48		#else, ($s4) = ($s4) - 48
 
 			_return:
-				beq $s5, 0, pow0		#jumps to pow0 if ($s5) == 0
 				beq $s5, 1, pow1		#jumps to pow1 if ($s5) == 0
 				beq $s5, 2, pow2		#jumps to pow2 if ($s5) == 0
 				beq $s5, 3, pow3		#jumps to pow3 if ($s5) == 0
 
-				add $s7, $s7, $s4		#adds $t3 to total sum
-				addi $s5, $s5, 1		
+				add $s7, $s7, $s4		#adds $s4 to total sum
+				addi $s5, $s5, 1		#$s5 += 1
 
 				jr $ra				#returns to checkChar in order to increment array element
 
