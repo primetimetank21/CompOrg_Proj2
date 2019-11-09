@@ -65,13 +65,20 @@ main:
 	pow1:
 		mult $t1, $s4				#($LO) = base-N^1 * ($s4)
 		mflo $s4				#($s4) = ($LO)
+		addi $s5, $s5, 1			#$s5 += 1
+
 		j _return				#jumps to _return
 
 	pow2:
 		mult $t1, $t1				#($LO) = base-N * base-N
 		mflo $t1				#($t1) = ($LO)
+		#mfhi $t2
 		mult $t1, $s4				#($LO) = base-N^2 * ($s4)
 		mflo $s4				#($s4) = ($LO)
+		mfhi $t2
+		add $s4, $s4, $t2
+		addi $s5, $s5, 1		#$s5 += 1
+
 		j _return				#jumps to _return
 
 	pow3:
@@ -84,6 +91,8 @@ main:
 
 		mult $t1, $s4				#($LO) = base-N^3 * ($s4)
 		mflo $s4				#($s4) = ($LO)
+		addi $s5, $s5, 1		#$s5 += 1
+
 		j _return				#jumps to _return
 
 	
@@ -93,6 +102,8 @@ main:
 			blt $s4, 48, badChar		#if ($s4) < 48, jump to badChar
 			bgt $s4, 57, check_upper	#if ($s4) > 57, jump to check_upper
 			addi $s4, $s4, -48		#else, ($s4) = ($s4) - 48
+			addi $s5, $s5, 1		#$s5 += 1
+
 
 			_return:
 				beq $s5, 1, pow1		#jumps to pow1 if ($s5) == 0
@@ -100,8 +111,6 @@ main:
 				beq $s5, 3, pow3		#jumps to pow3 if ($s5) == 0
 
 				add $s7, $s7, $s4		#adds $s4 to total sum
-				addi $s5, $s5, 1		#$s5 += 1
-
 				jr $ra				#returns to checkChar in order to increment array element
 
 	check_upper:
