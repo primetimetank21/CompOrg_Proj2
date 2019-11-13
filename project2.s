@@ -7,7 +7,9 @@
 
 .data
 	array:			.space 4000			#1000 element array (1 NULL space)
-	baseN:			.word 31			#base-N number
+	baseN:			.word 31			#base-N^1
+	baseN2:			.word 961			#base-N^2
+	baseN3:			.word 29791			#base-N^3
 	char: 			.space 2			#1 byte for char, 1 byte for NULL
 	invalid:		.asciiz "Invalid input"		#displays to user if input is invalid
 	newline:		.asciiz "\n"			#newline character
@@ -63,46 +65,34 @@ main:
 			j checkLength			#jump to checkLength
 
 	pow1:
+		lw $t1, baseN
 		mult $t1, $s4				#($LO) = base-N^1 * ($s4)
 		mflo $s4				#($s4) = ($LO)
-		addi $s5, $s5, 1			#$s5 += 1
 
-		j _return				#jumps to _return
+		j increase				#jumps to _return
 
 	pow2:
-		mult $t1, $t1				#($LO) = base-N * base-N
-		mflo $t1				#($t1) = ($LO)
-		#mfhi $t2
-		mult $t1, $s4				#($LO) = base-N^2 * ($s4)
-		mflo $s4				#($s4) = ($LO)
-		mfhi $t2
-		add $s4, $s4, $t2
-		addi $s5, $s5, 1		#$s5 += 1
+		lw $t1, baseN2
+		mult $s4, $t1
+		mflo $s4
 
-		j _return				#jumps to _return
+		j increase				#jumps to _return
 
 	pow3:
-		move $t3, $zero				#temporary counter for pow3_loop
-		pow3_loop:				#gets base-N^3
-			mult $t1, $t1			#($LO) = ($t1) * base-N
-			mflo $t1			#($t1) = ($LO)
-			addi $t3, $t3, 1		#($t3) += 1
-			blt $t3, 2, pow3_loop		#($t3) < 2 ? jump to pow3_loop
-
+		lw $t1, baseN3
 		mult $t1, $s4				#($LO) = base-N^3 * ($s4)
 		mflo $s4				#($s4) = ($LO)
-		addi $s5, $s5, 1		#$s5 += 1
 
-		j _return				#jumps to _return
+		j increase				#jumps to _return
 
 	
 	addChar:					#adds characters to a running sum
 		convert:				#converts ascii values && checks for validity
-			lw $t1, baseN
+			#lw $t1, baseN
 			blt $s4, 48, badChar		#if ($s4) < 48, jump to badChar
 			bgt $s4, 57, check_upper	#if ($s4) > 57, jump to check_upper
 			addi $s4, $s4, -48		#else, ($s4) = ($s4) - 48
-			addi $s5, $s5, 1		#$s5 += 1
+			#addi $s5, $s5, 1		#$s5 += 1
 
 
 			_return:
@@ -110,6 +100,11 @@ main:
 				beq $s5, 2, pow2		#jumps to pow2 if ($s5) == 0
 				beq $s5, 3, pow3		#jumps to pow3 if ($s5) == 0
 
+			increase:
+#li $v0, 11
+#move $a0, $s4
+#syscall
+				addi $s5, $s5, 1		#$s5 += 1
 				add $s7, $s7, $s4		#adds $s4 to total sum
 				jr $ra				#returns to checkChar in order to increment array element
 
@@ -161,5 +156,8 @@ main:
 
 
 	exit:						#finishes the program
+		li $v0, 1
+		move $a0, $s7
+		syscall
 		li $v0, 10				#exit_program command
 		syscall					#terminates program
